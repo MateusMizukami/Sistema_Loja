@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Página não encontrada - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-estreito" aria-labelledby="titulo">
+    <h1 id="titulo">Página não encontrada</h1>
+    <p>O endereço que você acessou não existe ou o produto não está mais disponível.</p>
+    <p><a class="botao botao-destaque" th:href="@{/}">Voltar ao catálogo</a></p>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

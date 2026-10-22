@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Acesso negado - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-estreito" aria-labelledby="titulo">
+    <h1 id="titulo">Acesso negado</h1>
+    <p>Você não tem permissão para acessar esta página.</p>
+    <p><a class="botao" th:href="@{/}">Voltar para o início</a></p>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

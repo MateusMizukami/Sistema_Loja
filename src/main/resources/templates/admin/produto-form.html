@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${titulo} + ' - Painel do gerente')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-medio" aria-labelledby="titulo">
+    <nav class="migalhas" aria-label="Você está em">
+        <ol>
+            <li><a th:href="@{/admin/produtos}">Produtos</a></li>
+            <li aria-current="page" th:text="${titulo}">Produto</li>
+        </ol>
+    </nav>
+
+    <h1 id="titulo" th:text="${titulo}">Produto</h1>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <form th:action="@{${acao}}" th:object="${produto}" method="post" enctype="multipart/form-data"
+          class="formulario" novalidate>
+
+        <div class="campo">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" th:field="*{nome}" maxlength="255" required
+                   th:attr="aria-invalid=${#fields.hasErrors('nome')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="categoriaId">Categoria</label>
+            <select id="categoriaId" th:field="*{categoriaId}" required
+                    th:attr="aria-invalid=${#fields.hasErrors('categoriaId')}">
+                <option value="">Selecione...</option>
+                <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}">Categoria</option>
+            </select>
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('categoriaId')}" th:errors="*{categoriaId}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="preco">Preço (R$)</label>
+            <input type="number" id="preco" th:field="*{preco}" step="0.01" min="0.01" inputmode="decimal" required
+                   th:attr="aria-invalid=${#fields.hasErrors('preco')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('preco')}" th:errors="*{preco}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="estoque">Estoque (unidades)</label>
+            <input type="number" id="estoque" th:field="*{estoque}" step="1" min="0" required
+                   th:attr="aria-invalid=${#fields.hasErrors('estoque')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('estoque')}" th:errors="*{estoque}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="descricao">Descrição (opcional)</label>
+            <textarea id="descricao" th:field="*{descricao}" rows="5" maxlength="2000"
+                      th:attr="aria-invalid=${#fields.hasErrors('descricao')}"></textarea>
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="imagem">Imagem (opcional)</label>
+            <div th:if="${imagemAtual != null}" class="imagem-atual">
+                <img class="previa" th:src="@{${imagemAtual}}" alt="Imagem atual do produto">
+            </div>
+            <input type="file" id="imagem" name="imagem" accept="image/jpeg,image/png,image/gif,image/webp"
+                   aria-describedby="dica-imagem">
+            <small id="dica-imagem">JPG, PNG, GIF ou WebP, até 2 MB.
+                <span th:if="${imagemAtual != null}">Se enviar uma nova, ela substitui a atual.</span></small>
+        </div>
+
+        <div class="campo campo-check" th:if="${imagemAtual != null}">
+            <input type="checkbox" id="removerImagem" th:field="*{removerImagem}">
+            <label for="removerImagem">Remover a imagem atual</label>
+        </div>
+
+        <div class="campo campo-check" th:if="${edicao}">
+            <input type="checkbox" id="ativo" th:field="*{ativo}">
+            <label for="ativo">Produto ativo (visível no catálogo)</label>
+        </div>
+
+        <button type="submit" class="botao botao-destaque">Salvar produto</button>
+        <a class="link-limpar" th:href="@{/admin/produtos}">Cancelar</a>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

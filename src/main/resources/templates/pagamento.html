@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pagamento - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-medio" aria-labelledby="titulo">
+
+    <nav class="migalhas" aria-label="Você está em">
+        <ol>
+            <li><a th:href="@{/pedidos}">Meus pedidos</a></li>
+            <li><a th:href="@{/pedidos/{id}(id=${pedido.id})}" th:text="|Pedido #${pedido.id}|">Pedido</a></li>
+            <li aria-current="page">Pagamento</li>
+        </ol>
+    </nav>
+
+    <h1 id="titulo" th:text="|Pagamento do pedido #${pedido.id}|">Pagamento</h1>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <p id="estado" class="sr-only" role="status" aria-live="polite"
+       th:attr="data-pedido=${pedido.id},data-status=${pagamento.status.name()}"></p>
+
+    <!-- Pago -->
+    <div class="alerta alerta-ok" role="status" th:if="${pagamento.status.name() == 'CONFIRMADO'}">
+        <p>Pagamento confirmado! Seu pedido está sendo processado.</p>
+        <p><a th:href="@{/pedidos/{id}(id=${pedido.id})}">Ver o pedido</a></p>
+    </div>
+
+    <!-- Aguardando -->
+    <section th:if="${pagamento.status.name() == 'PENDENTE'}" class="bloco" aria-labelledby="titulo-total">
+        <h2 id="titulo-total">Total a pagar</h2>
+        <p><span th:replace="~{fragments/produto :: preco(${pagamento.valor})}"></span></p>
+        <p class="dica" th:if="${pagamento.expiraEm != null}"
+           th:text="|Pague até ${#temporals.format(pagamento.expiraEm, 'HH:mm')}. Depois disso o pedido é cancelado.|">
+            Prazo.</p>
+
+        <!-- PIX -->
+        <div th:if="${pagamento.forma.name() == 'PIX'}">
+            <img class="qrcode" th:src="${'data:image/png;base64,' + pagamento.pixQrCodeBase64}"
+                 th:alt="|QR Code PIX para pagar o pedido ${pedido.id}|" width="240" height="240">
+
+            <div class="campo">
+                <label for="copia">PIX copia e cola</label>
+                <textarea id="copia" readonly rows="4" th:text="${pagamento.pixCopiaECola}"></textarea>
+            </div>
+            <p><button type="button" id="botao-copiar" class="botao">Copiar código</button></p>
+            <p class="dica">Abra o app do seu banco, escolha pagar com PIX e escaneie o QR Code ou cole o código.</p>
+        </div>
+
+        <!-- Cartão: o pagamento acontece na página do Asaas-->
+        <div th:if="${pagamento.forma.name() == 'CARTAO_CREDITO'}">
+            <p>Você será levado à página segura do Asaas para informar os dados do cartão.
+                Nenhum dado do cartão passa por este sistema.</p>
+            <p><a class="botao botao-destaque" th:href="${pagamento.invoiceUrl}" target="_blank"
+                  rel="noopener noreferrer">Pagar com cartão (abre em nova aba)</a></p>
+        </div>
+
+        <form th:action="@{/pedidos/{id}/pagamento/verificar(id=${pedido.id})}" method="post">
+            <button type="submit" class="botao">Já paguei, verificar agora</button>
+        </form>
+        <p class="dica">A página confere sozinha a cada poucos segundos e atualiza quando o pagamento for confirmado.</p>
+    </section>
+
+    <!-- Encerrado sem pagamento -->
+    <div class="alerta alerta-aviso"
+         th:if="${pagamento.status.name() == 'CANCELADO' or pagamento.status.name() == 'EXPIRADO' or pagamento.status.name() == 'ESTORNADO'}">
+        <p th:text="|Esta cobrança está: ${pagamento.status.descricao}.|">Situação.</p>
+        <p><a th:href="@{/pedidos/{id}(id=${pedido.id})}">Voltar ao pedido</a></p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/pagamento.js}" defer></script>
+</body>
+</html>

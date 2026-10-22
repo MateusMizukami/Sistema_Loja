@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Editar cliente - Painel do gerente')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-medio" aria-labelledby="titulo">
+    <nav class="migalhas" aria-label="Você está em">
+        <ol>
+            <li><a th:href="@{/admin/clientes}">Clientes</a></li>
+            <li><a th:href="@{/admin/clientes/{id}(id=${clienteId})}">Detalhes</a></li>
+            <li aria-current="page">Editar</li>
+        </ol>
+    </nav>
+
+    <h1 id="titulo">Editar cliente</h1>
+
+    <form th:action="@{/admin/clientes/{id}/editar(id=${clienteId})}" th:object="${clienteForm}" method="post"
+          class="formulario" novalidate>
+
+        <div class="campo">
+            <span class="rotulo">E-mail</span>
+            <p class="valor-fixo" th:text="${clienteEmail}">email</p>
+            <small>O e-mail não pode ser alterado.</small>
+        </div>
+
+        <div class="campo">
+            <label for="nome">Nome completo</label>
+            <input type="text" id="nome" th:field="*{nome}" maxlength="100" required
+                   th:attr="aria-invalid=${#fields.hasErrors('nome')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="telefone">Telefone (opcional)</label>
+            <input type="tel" id="telefone" th:field="*{telefone}"
+                   th:attr="aria-invalid=${#fields.hasErrors('telefone')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="cpf">CPF (opcional)</label>
+            <input type="text" id="cpf" th:field="*{cpf}" inputmode="numeric" placeholder="000.000.000-00"
+                   th:attr="aria-invalid=${#fields.hasErrors('cpf')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('cpf')}" th:errors="*{cpf}"></p>
+        </div>
+
+        <button type="submit" class="botao botao-destaque">Salvar alterações</button>
+        <a class="link-limpar" th:href="@{/admin/clientes/{id}(id=${clienteId})}">Cancelar</a>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${cliente.nome} + ' - Painel do gerente')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+    <nav class="migalhas" aria-label="Você está em">
+        <ol>
+            <li><a th:href="@{/admin/clientes}">Clientes</a></li>
+            <li aria-current="page" th:text="${cliente.nome}">Cliente</li>
+        </ol>
+    </nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h1 id="titulo" th:text="${cliente.nome}">Cliente</h1>
+
+    <dl class="dados-pedido">
+        <dt>E-mail</dt>
+        <dd th:text="${cliente.email}">email</dd>
+        <dt>Telefone</dt>
+        <dd th:text="${cliente.telefone != null} ? ${cliente.telefone} : 'Não informado'">—</dd>
+        <dt>CPF</dt>
+        <dd th:text="${cliente.cpf != null} ? ${cliente.cpf} : 'Não informado'">—</dd>
+        <dt>Situação da conta</dt>
+        <dd><span class="status" th:classappend="${cliente.ativo} ? 'status-finalizado' : 'status-cancelado'"
+                  th:text="${cliente.ativo} ? 'Ativa' : 'Desativada'">Ativa</span></dd>
+    </dl>
+
+    <div class="acoes-linha acoes-cliente">
+        <a class="botao" th:href="@{/admin/clientes/{id}/editar(id=${cliente.id})}">Editar dados</a>
+
+        <form th:if="${cliente.ativo}" th:action="@{/admin/clientes/{id}/desativar(id=${cliente.id})}" method="post"
+              class="form-inline" onsubmit="return confirm('Desativar esta conta? O cliente não conseguirá mais entrar.');">
+            <button type="submit" class="botao botao-perigo">Desativar conta</button>
+        </form>
+        <form th:unless="${cliente.ativo}" th:action="@{/admin/clientes/{id}/ativar(id=${cliente.id})}" method="post" class="form-inline">
+            <button type="submit" class="botao botao-destaque">Reativar conta</button>
+        </form>
+    </div>
+
+    <h2>Pedidos do cliente</h2>
+
+    <div class="vazio" th:if="${pedidos.empty}"><p>Este cliente ainda não fez pedidos.</p></div>
+
+    <div class="tabela-rolavel" th:unless="${pedidos.empty}">
+        <table class="tabela">
+            <caption class="sr-only">Pedidos do cliente</caption>
+            <thead>
+            <tr>
+                <th scope="col">Pedido</th>
+                <th scope="col">Data</th>
+                <th scope="col">Status</th>
+                <th scope="col">Total</th>
+                <th scope="col"><span class="sr-only">Detalhes</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${pedidos}">
+                <th scope="row" th:text="|#${p.id}|">#1</th>
+                <td th:text="${#temporals.format(p.data, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                <td><span class="status" th:classappend="${'status-' + #strings.toLowerCase(p.status.name())}"
+                          th:text="${p.status.descricao}">Status</span></td>
+                <td><span th:replace="~{fragments/produto :: preco(${p.total})}"></span></td>
+                <td><a th:href="@{/admin/pedidos/{id}(id=${p.id})}"
+                       th:attr="aria-label=|Ver detalhes do pedido ${p.id}|">Ver detalhes</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

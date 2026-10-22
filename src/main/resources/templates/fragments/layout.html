@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Loja Vendas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:fragment="header" class="cab">
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <div class="cab-faixa">
+        <p class="cab-faixa-texto">
+            <span class="so-loja">Pague com PIX ou cartão de crédito</span>
+            <span class="so-admin">Painel do gerente</span>
+        </p>
+    </div>
+
+    <nav class="cab-nav" aria-label="Navegação principal">
+        <a class="cab-logo" th:href="@{/}" aria-label="Loja Vendas - página inicial">
+            <span class="cab-logo-marca" aria-hidden="true">L</span>
+            <span class="cab-logo-texto">Loja<strong>Vendas</strong></span>
+        </a>
+
+        <form class="cab-busca" th:action="@{/busca}" method="get" role="search">
+            <label for="busca-termo" class="sr-only">Buscar produtos</label>
+            <input type="search" id="busca-termo" name="termo" th:value="${termo}"
+                   placeholder="O que você procura?" maxlength="100">
+            <button type="submit" class="cab-busca-botao" aria-label="Buscar">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                    <path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                          d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm10 2-4.35-4.35"/>
+                </svg>
+            </button>
+        </form>
+
+        <div class="cab-acoes">
+            <!-- Visitante -->
+            <th:block sec:authorize="!isAuthenticated()">
+                <a class="cab-link" th:href="@{/login}">Entrar</a>
+                <a class="cab-botao" th:href="@{/cadastro}">Cadastrar-se</a>
+            </th:block>
+
+            <!-- Logado (cliente ou gerente) -->
+            <th:block sec:authorize="isAuthenticated()">
+                <span class="cab-saudacao">Olá, <strong th:text="${#authentication.principal.nome}">Usuário</strong></span>
+                <span class="selo" sec:authorize="hasRole('ADMIN')">Gerente</span>
+                <a class="cab-link" sec:authorize="hasRole('ADMIN')" th:href="@{/admin}">Painel</a>
+                <a class="cab-link" sec:authorize="hasRole('USER')" th:href="@{/carrinho}">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                        <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                              stroke-linejoin="round" d="M2 3h3l2.4 11.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.78L20 7H6"/>
+                        <circle cx="9" cy="19" r="1.5" fill="currentColor"/>
+                        <circle cx="17" cy="19" r="1.5" fill="currentColor"/>
+                    </svg>
+                    Carrinho</a>
+                <a class="cab-link" th:href="@{/perfil}">Minha conta</a>
+                <form th:action="@{/logout}" method="post" class="form-inline">
+                    <button type="submit" class="cab-botao cab-botao-claro">Sair</button>
+                </form>
+            </th:block>
+        </div>
+    </nav>
+</header>
+
+<footer th:fragment="footer" class="rod">
+    <div class="rod-colunas">
+        <div>
+            <p class="rod-titulo">Loja Vendas</p>
+            <p>Informática, smartphones e itens para a casa, com pagamento por PIX ou cartão de crédito.</p>
+        </div>
+
+        <nav aria-label="Links do rodapé">
+            <p class="rod-titulo">Sua conta</p>
+            <ul>
+                <li sec:authorize="!isAuthenticated()"><a th:href="@{/login}">Entrar</a></li>
+                <li sec:authorize="!isAuthenticated()"><a th:href="@{/cadastro}">Criar conta</a></li>
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/perfil}">Minha conta</a></li>
+                <li sec:authorize="hasRole('USER')"><a th:href="@{/pedidos}">Meus pedidos</a></li>
+                <li sec:authorize="hasRole('USER')"><a th:href="@{/carrinho}">Carrinho</a></li>
+            </ul>
+        </nav>
+
+        <div>
+            <p class="rod-titulo">Pagamento</p>
+            <ul>
+                <li>PIX</li>
+                <li>Cartão de crédito</li>
+            </ul>
+            <p class="rod-nota">Pagamentos processados pelo Asaas.</p>
+        </div>
+    </div>
+    <p class="rod-base">&copy; 2026 Loja Vendas</p>
+</footer>
+
+<div th:fragment="mensagens">
+    <div class="alerta alerta-erro" role="alert" th:if="${erro != null}">
+        <p th:text="${erro}">Erro</p>
+    </div>
+    <div class="alerta alerta-ok" role="status" th:if="${sucesso != null}">
+        <p th:text="${sucesso}">Sucesso</p>
+    </div>
+</div>
+
+<!-- Menu da área "Minha conta" -->
+<nav th:fragment="menuConta(ativa)" class="menu-conta" aria-label="Minha conta">
+    <ul>
+        <li><a th:href="@{/perfil}" th:attr="aria-current=${ativa == 'dados' ? 'page' : null}">Dados pessoais</a></li>
+        <li><a th:href="@{/perfil/enderecos}" th:attr="aria-current=${ativa == 'enderecos' ? 'page' : null}">Endereços</a></li>
+        <li><a th:href="@{/perfil/senha}" th:attr="aria-current=${ativa == 'senha' ? 'page' : null}">Alterar senha</a></li>
+        <li sec:authorize="hasRole('USER')"><a th:href="@{/pedidos}" th:attr="aria-current=${ativa == 'pedidos' ? 'page' : null}">Meus pedidos</a></li>
+    </ul>
+</nav>
+
+<!-- Menu do painel do gerente -->
+<nav th:fragment="menuAdmin(ativa)" class="menu-conta" aria-label="Painel do gerente">
+    <ul>
+        <li><a th:href="@{/admin}" th:attr="aria-current=${ativa == 'resumo' ? 'page' : null}">Resumo</a></li>
+        <li><a th:href="@{/admin/produtos}" th:attr="aria-current=${ativa == 'produtos' ? 'page' : null}">Produtos</a></li>
+        <li><a th:href="@{/admin/categorias}" th:attr="aria-current=${ativa == 'categorias' ? 'page' : null}">Categorias</a></li>
+        <li><a th:href="@{/admin/clientes}" th:attr="aria-current=${ativa == 'clientes' ? 'page' : null}">Clientes</a></li>
+        <li><a th:href="@{/admin/pedidos}" th:attr="aria-current=${ativa == 'pedidos' ? 'page' : null}">Pedidos</a></li>
+    </ul>
+</nav>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pedidos - Painel do gerente')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+    <h1 id="titulo">Painel do gerente</h1>
+    <nav th:replace="~{fragments/layout :: menuAdmin('pedidos')}"></nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h2>Pedidos</h2>
+
+    <form th:action="@{/admin/pedidos}" method="get" class="busca-admin">
+        <label for="status">Filtrar por status</label>
+        <select id="status" name="status">
+            <option value="">Todos</option>
+            <option th:each="s : ${statusOpcoes}" th:value="${s.name()}" th:text="${s.descricao}"
+                    th:selected="${statusSel == s.name()}">Status</option>
+        </select>
+        <button type="submit" class="botao">Filtrar</button>
+        <a th:if="${!statusSel.isEmpty()}" th:href="@{/admin/pedidos}">Limpar</a>
+    </form>
+
+    <p class="contagem" role="status" th:text="|${pagina.totalElements} pedido(s)|">0 pedido(s)</p>
+
+    <div class="vazio" th:if="${pedidos.empty}"><p>Nenhum pedido encontrado.</p></div>
+
+    <div class="tabela-rolavel" th:unless="${pedidos.empty}">
+        <table class="tabela">
+            <caption class="sr-only">Lista de pedidos</caption>
+            <thead>
+            <tr>
+                <th scope="col">Pedido</th>
+                <th scope="col">Data</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Itens</th>
+                <th scope="col">Status</th>
+                <th scope="col">Total</th>
+                <th scope="col"><span class="sr-only">Detalhes</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${pedidos}">
+                <th scope="row" th:text="|#${p.id}|">#1</th>
+                <td th:text="${#temporals.format(p.data, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                <td><a th:href="@{/admin/clientes/{id}(id=${p.clienteId})}" th:text="${p.clienteNome}">Cliente</a></td>
+                <td th:text="${p.quantidadeItens}">1</td>
+                <td><span class="status" th:classappend="${'status-' + #strings.toLowerCase(p.status.name())}"
+                          th:text="${p.status.descricao}">Status</span></td>
+                <td><span th:replace="~{fragments/produto :: preco(${p.total})}"></span></td>
+                <td><a th:href="@{/admin/pedidos/{id}(id=${p.id})}"
+                       th:attr="aria-label=|Ver detalhes do pedido ${p.id}|">Ver detalhes</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav class="paginacao" aria-label="Paginação" th:if="${pagina.totalPages > 1}">
+        <a class="botao" th:if="${pagina.hasPrevious()}"
+           th:href="@{/admin/pedidos(status=${statusSel},page=${pagina.number - 1})}" rel="prev">Anterior</a>
+        <span th:text="|Página ${pagina.number + 1} de ${pagina.totalPages}|">Página 1 de 1</span>
+        <a class="botao" th:if="${pagina.hasNext()}"
+           th:href="@{/admin/pedidos(status=${statusSel},page=${pagina.number + 1})}" rel="next">Próxima</a>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

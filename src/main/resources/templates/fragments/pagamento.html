@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Escolha da forma de pagamento (usado no checkout e na tela do pedido) -->
+<fieldset th:fragment="formas" class="lista-enderecos">
+    <legend>Forma de pagamento</legend>
+
+    <div class="opcao-endereco">
+        <input type="radio" name="forma" id="forma-pix" value="PIX" checked required>
+        <label for="forma-pix">PIX (QR Code ou código copia e cola)</label>
+    </div>
+    <div class="opcao-endereco">
+        <input type="radio" name="forma" id="forma-cartao" value="CARTAO_CREDITO" required>
+        <label for="forma-cartao">Cartão de crédito (você paga na página segura do Asaas)</label>
+    </div>
+</fieldset>
+
+</body>
+</html>

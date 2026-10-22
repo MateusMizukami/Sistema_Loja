@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${titulo} + ' - Painel do gerente')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-estreito" aria-labelledby="titulo">
+    <nav class="migalhas" aria-label="Você está em">
+        <ol>
+            <li><a th:href="@{/admin/categorias}">Categorias</a></li>
+            <li aria-current="page" th:text="${titulo}">Categoria</li>
+        </ol>
+    </nav>
+
+    <h1 id="titulo" th:text="${titulo}">Categoria</h1>
+
+    <form th:action="@{${acao}}" th:object="${categoria}" method="post" class="formulario" novalidate>
+        <div class="campo">
+            <label for="nome">Nome da categoria</label>
+            <input type="text" id="nome" th:field="*{nome}" maxlength="100" required autofocus
+                   th:attr="aria-invalid=${#fields.hasErrors('nome')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></p>
+        </div>
+
+        <button type="submit" class="botao botao-destaque">Salvar categoria</button>
+        <a class="link-limpar" th:href="@{/admin/categorias}">Cancelar</a>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

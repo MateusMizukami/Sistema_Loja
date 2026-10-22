@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Preço no formato brasileiro, independente do idioma do navegador -->
+<span th:fragment="preco(valor)" class="preco"
+      th:text="${'R$ ' + #numbers.formatDecimal(valor, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</span>
+
+<!-- Card da listagem. A imagem é decorativa porque o nome do produto está no link. -->
+<article th:fragment="card(produto)" class="card-produto">
+    <a class="card-imagem" th:href="@{/produtos/{id}(id=${produto.id})}" tabindex="-1" aria-hidden="true">
+        <img th:src="${#strings.isEmpty(produto.urlImagem)} ? @{/img/placeholder.svg} : ${produto.urlImagem}"
+             alt="" loading="lazy">
+    </a>
+    <div class="card-corpo">
+        <p class="card-categoria" th:if="${produto.categoria != null}" th:text="${produto.categoria.nome}">Categoria</p>
+        <h2 class="card-titulo">
+            <a th:href="@{/produtos/{id}(id=${produto.id})}" th:text="${produto.nome}">Nome do produto</a>
+        </h2>
+        <p class="card-preco"><span th:replace="~{fragments/produto :: preco(${produto.preco})}"></span></p>
+        <p class="card-esgotado" th:if="${produto.estoque == 0}">Esgotado</p>
+    </div>
+</article>
+
+</body>
+</html>

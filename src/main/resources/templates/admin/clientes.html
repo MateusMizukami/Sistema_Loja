@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Clientes - Painel do gerente')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+    <h1 id="titulo">Painel do gerente</h1>
+    <nav th:replace="~{fragments/layout :: menuAdmin('clientes')}"></nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h2>Clientes</h2>
+
+    <form th:action="@{/admin/clientes}" method="get" role="search" class="busca-admin">
+        <label for="termo" class="sr-only">Buscar cliente pelo nome ou e-mail</label>
+        <input type="search" id="termo" name="termo" th:value="${termo}" placeholder="Nome ou e-mail" maxlength="100">
+        <button type="submit" class="botao">Buscar</button>
+        <a th:if="${!termo.isEmpty()}" th:href="@{/admin/clientes}">Limpar</a>
+    </form>
+
+    <p class="contagem" role="status" th:text="|${pagina.totalElements} cliente(s)|">0 cliente(s)</p>
+
+    <div class="vazio" th:if="${clientes.empty}"><p>Nenhum cliente encontrado.</p></div>
+
+    <div class="tabela-rolavel" th:unless="${clientes.empty}">
+        <table class="tabela">
+            <caption class="sr-only">Lista de clientes</caption>
+            <thead>
+            <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">Situação</th>
+                <th scope="col"><span class="sr-only">Detalhes</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${clientes}">
+                <th scope="row" th:text="${c.nome}">Nome</th>
+                <td th:text="${c.email}">email</td>
+                <td th:text="${c.telefone != null} ? ${c.telefone} : '—'">—</td>
+                <td><span class="status" th:classappend="${c.ativo} ? 'status-finalizado' : 'status-cancelado'"
+                          th:text="${c.ativo} ? 'Ativo' : 'Inativo'">Ativo</span></td>
+                <td><a th:href="@{/admin/clientes/{id}(id=${c.id})}"
+                       th:attr="aria-label=|Ver detalhes de ${c.nome}|">Ver detalhes</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav class="paginacao" aria-label="Paginação" th:if="${pagina.totalPages > 1}">
+        <a class="botao" th:if="${pagina.hasPrevious()}"
+           th:href="@{/admin/clientes(termo=${termo},page=${pagina.number - 1})}" rel="prev">Anterior</a>
+        <span th:text="|Página ${pagina.number + 1} de ${pagina.totalPages}|">Página 1 de 1</span>
+        <a class="botao" th:if="${pagina.hasNext()}"
+           th:href="@{/admin/clientes(termo=${termo},page=${pagina.number + 1})}" rel="next">Próxima</a>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

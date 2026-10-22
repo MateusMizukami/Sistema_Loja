@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Painel do gerente - Loja Vendas')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+    <h1 id="titulo">Painel do gerente</h1>
+    <nav th:replace="~{fragments/layout :: menuAdmin('resumo')}"></nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <section aria-labelledby="titulo-indicadores">
+        <h2 id="titulo-indicadores">Resumo</h2>
+        <dl class="indicadores">
+            <div class="indicador indicador-destaque">
+                <dt>Vendas em <span th:text="${dash.mesReferencia}">mês</span></dt>
+                <dd><span th:replace="~{fragments/produto :: preco(${dash.vendasMes})}"></span></dd>
+                <dd class="indicador-nota" th:text="|${dash.pedidosMes} pedido(s) com pagamento confirmado|">0 pedido(s)</dd>
+            </div>
+            <div class="indicador">
+                <dt>Total de pedidos</dt>
+                <dd class="numero"><a th:href="@{/admin/pedidos}" th:text="${dash.totalPedidos}">0</a></dd>
+            </div>
+            <div class="indicador">
+                <dt>Aguardando pagamento</dt>
+                <dd class="numero"><a th:href="@{/admin/pedidos(status='AGUARDANDO_PAGAMENTO')}" th:text="${dash.aguardandoPagamento}">0</a></dd>
+            </div>
+            <div class="indicador">
+                <dt>Clientes</dt>
+                <dd class="numero"><a th:href="@{/admin/clientes}" th:text="${dash.totalClientes}">0</a></dd>
+            </div>
+            <div class="indicador">
+                <dt>Produtos ativos</dt>
+                <dd class="numero"><a th:href="@{/admin/produtos}" th:text="${dash.produtosAtivos}">0</a></dd>
+            </div>
+        </dl>
+    </section>
+
+    <section aria-labelledby="titulo-estoque" class="bloco">
+        <h2 id="titulo-estoque" th:text="|Estoque baixo (até ${dash.limiteEstoqueBaixo} unidades)|">Estoque baixo</h2>
+
+        <p th:if="${dash.estoqueBaixo.empty}">Nenhum produto ativo com estoque baixo.</p>
+
+        <div class="tabela-rolavel" th:unless="${dash.estoqueBaixo.empty}">
+            <table class="tabela">
+                <caption class="sr-only">Produtos ativos com estoque baixo</caption>
+                <thead>
+                <tr>
+                    <th scope="col">Produto</th>
+                    <th scope="col">Estoque</th>
+                    <th scope="col"><span class="sr-only">Ações</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${dash.estoqueBaixo}">
+                    <th scope="row" th:text="${p.nome}">Produto</th>
+                    <td>
+                        <span th:text="${p.estoque}">0</span>
+                        <span class="item-aviso" th:if="${p.estoque == 0}"> (esgotado)</span>
+                    </td>
+                    <td><a th:href="@{/admin/produtos/{id}/editar(id=${p.id})}"
+                           th:attr="aria-label=|Repor estoque de ${p.nome}|">Repor estoque</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

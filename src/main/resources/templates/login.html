@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Entrar - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-estreito" aria-labelledby="titulo">
+    <h1 id="titulo">Acesse sua conta</h1>
+
+    <div th:if="${param.erro != null}" class="alerta alerta-erro" role="alert">
+        <p>E-mail ou senha inválidos, ou conta inativa.</p>
+    </div>
+    <div th:if="${param.logout != null}" class="alerta alerta-ok" role="status">
+        <p>Você saiu da sua conta.</p>
+    </div>
+    <div th:if="${param.cadastrado != null}" class="alerta alerta-ok" role="status">
+        <p>Cadastro realizado! Entre com seu e-mail e senha.</p>
+    </div>
+
+    <form th:action="@{/login}" method="post" class="formulario">
+        <div class="campo">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" required autocomplete="email" autofocus>
+        </div>
+
+        <div class="campo">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="botao botao-destaque">Entrar</button>
+    </form>
+
+    <p>Ainda não tem conta? <a th:href="@{/cadastro}">Cadastre-se</a>.</p>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Alterar senha - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-medio" aria-labelledby="titulo">
+    <h1 id="titulo">Minha conta</h1>
+    <nav th:replace="~{fragments/layout :: menuConta('senha')}"></nav>
+
+    <h2>Alterar senha</h2>
+
+    <form th:action="@{/perfil/senha}" th:object="${senhaForm}" method="post" class="formulario" novalidate>
+
+        <div class="campo">
+            <label for="senhaAtual">Senha atual</label>
+            <input type="password" id="senhaAtual" th:field="*{senhaAtual}" autocomplete="current-password" required
+                   th:attr="aria-invalid=${#fields.hasErrors('senhaAtual')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('senhaAtual')}" th:errors="*{senhaAtual}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="novaSenha">Nova senha</label>
+            <input type="password" id="novaSenha" th:field="*{novaSenha}" autocomplete="new-password" required
+                   aria-describedby="dica-nova-senha"
+                   th:attr="aria-invalid=${#fields.hasErrors('novaSenha')}">
+            <small id="dica-nova-senha">Mínimo de 6 caracteres.</small>
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('novaSenha')}" th:errors="*{novaSenha}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="confirmarNovaSenha">Confirmar nova senha</label>
+            <input type="password" id="confirmarNovaSenha" th:field="*{confirmarNovaSenha}" autocomplete="new-password" required
+                   th:attr="aria-invalid=${#fields.hasErrors('confirmarNovaSenha')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('confirmarNovaSenha')}" th:errors="*{confirmarNovaSenha}"></p>
+        </div>
+
+        <button type="submit" class="botao botao-destaque">Alterar senha</button>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

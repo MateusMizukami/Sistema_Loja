@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pedido - Painel do gerente')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+    <nav class="migalhas" aria-label="Você está em">
+        <ol>
+            <li><a th:href="@{/admin/pedidos}">Pedidos</a></li>
+            <li aria-current="page" th:text="|Pedido #${pedido.id}|">Pedido</li>
+        </ol>
+    </nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h1 id="titulo" th:text="|Pedido #${pedido.id}|">Pedido</h1>
+
+    <dl class="dados-pedido">
+        <dt>Data</dt>
+        <dd th:text="${#temporals.format(pedido.dataCriacao, 'dd/MM/yyyy HH:mm')}">01/01/2026</dd>
+        <dt>Cliente</dt>
+        <dd><a th:href="@{/admin/clientes/{id}(id=${pedido.cliente.id})}" th:text="${pedido.cliente.nome}">Cliente</a>
+            (<span th:text="${pedido.cliente.email}">email</span>)</dd>
+        <dt>Status</dt>
+        <dd><span class="status" th:classappend="${'status-' + #strings.toLowerCase(pedido.status.name())}"
+                  th:text="${pedido.status.descricao}">Status</span></dd>
+        <dt>Pagamento</dt>
+        <dd th:if="${pagamento == null}">Sem cobrança no Asaas</dd>
+        <dd th:if="${pagamento != null}">
+            <span th:text="${pagamento.forma.descricao}">PIX</span> &mdash;
+            <span class="status"
+                  th:classappend="${pagamento.status.name() == 'CONFIRMADO' ? 'status-finalizado' : (pagamento.status.name() == 'PENDENTE' ? 'status-aguardando_pagamento' : 'status-cancelado')}"
+                  th:text="${pagamento.status.descricao}">Status</span>
+            <span class="dica" th:text="|Cobrança ${pagamento.asaasId}|">Cobrança</span>
+        </dd>
+        <dt>Endereço de entrega</dt>
+        <dd th:text="${pedido.enderecoEntrega}">Endereço</dd>
+    </dl>
+
+    <section class="bloco" aria-labelledby="titulo-andamento" th:if="${!pedido.status.transicoesPermitidas().empty}">
+        <h2 id="titulo-andamento">Andamento do pedido</h2>
+        <div class="acoes-linha">
+            <th:block th:each="proximo : ${pedido.status.transicoesPermitidas()}">
+
+                <form th:if="${proximo.name() != 'CANCELADO'}" th:action="@{/admin/pedidos/{id}/status(id=${pedido.id})}"
+                      method="post" class="form-inline">
+                    <input type="hidden" name="novoStatus" th:value="${proximo.name()}">
+                    <button type="submit" class="botao botao-destaque"
+                            th:text="${proximo.name() == 'PAGAMENTO_APROVADO'} ? 'Aprovar pagamento' : |Marcar como ${proximo.descricao}|">Avançar</button>
+                </form>
+
+                <form th:if="${proximo.name() == 'CANCELADO'}" th:action="@{/admin/pedidos/{id}/status(id=${pedido.id})}"
+                      method="post" class="form-inline"
+                      onsubmit="return confirm('Cancelar este pedido e devolver o estoque dos itens?');">
+                    <input type="hidden" name="novoStatus" th:value="${proximo.name()}">
+                    <button type="submit" class="botao botao-perigo">Cancelar pedido (devolve o estoque)</button>
+                </form>
+            </th:block>
+        </div>
+    </section>
+
+    <p th:if="${pedido.status.transicoesPermitidas().empty}" class="dica">
+        Este pedido está em um status final e não pode mais ser alterado.
+    </p>
+
+    <section class="bloco" aria-labelledby="titulo-nota">
+        <h2 id="titulo-nota">Nota fiscal</h2>
+        <!-- Já existe nota -->
+        <th:block th:if="${nota != null}">
+            <p>Nota nº <strong th:text="${nota.numero}">1</strong>, série <span th:text="${nota.serie}">1</span>
+                &mdash;
+                <span class="status"
+                      th:classappend="${nota.status.name() == 'AUTORIZADA'} ? 'status-finalizado' : 'status-cancelado'"
+                      th:text="${nota.status.descricao}">Autorizada</span></p>
+            <p><a class="botao" th:href="@{/admin/pedidos/{id}/nota-fiscal(id=${pedido.id})}">Ver nota</a></p>
+
+            <form th:if="${nota.status.name() == 'AUTORIZADA'}"
+                  th:action="@{/admin/pedidos/{id}/nota-fiscal/cancelar(id=${pedido.id})}" method="post"
+                  class="formulario"
+                  onsubmit="return confirm('Cancelar esta nota fiscal?');">
+                <div class="campo">
+                    <label for="justificativa">Justificativa do cancelamento (mínimo de 15 caracteres)</label>
+                    <input type="text" id="justificativa" name="justificativa" minlength="15" maxlength="255" required
+                           aria-describedby="dica-prazo">
+                    <small id="dica-prazo"
+                           th:text="|O cancelamento só é permitido até ${prazoCancelamentoNota} horas após a emissão.|">Prazo.</small>
+                </div>
+                <button type="submit" class="botao botao-perigo">Cancelar nota fiscal</button>
+            </form>
+        </th:block>
+
+        <!-- Ainda não existe nota -->
+        <th:block th:if="${nota == null}">
+            <ul class="lista-pendencias" th:unless="${#lists.isEmpty(pendenciasNota)}">
+                <li th:each="p : ${pendenciasNota}" th:text="${p}">Pendência</li>
+            </ul>
+
+            <form th:if="${#lists.isEmpty(pendenciasNota)}"
+                  th:action="@{/admin/pedidos/{id}/nota-fiscal/emitir(id=${pedido.id})}" method="post">
+                <button type="submit" class="botao botao-destaque">Emitir nota fiscal</button>
+            </form>
+        </th:block>
+    </section>
+
+    <h2>Itens</h2>
+    <div class="tabela-rolavel">
+        <table class="tabela">
+            <caption class="sr-only">Itens do pedido</caption>
+            <thead>
+            <tr>
+                <th scope="col">Produto</th>
+                <th scope="col">Qtd.</th>
+                <th scope="col">Preço</th>
+                <th scope="col">Subtotal</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${pedido.itens}">
+                <th scope="row" th:text="${item.produto.nome}">Produto</th>
+                <td th:text="${item.quantidade}">1</td>
+                <td><span th:replace="~{fragments/produto :: preco(${item.precoUnitario})}"></span></td>
+                <td><span th:replace="~{fragments/produto :: preco(${item.subtotal})}"></span></td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <th scope="row" colspan="3">Total</th>
+                <td><span th:replace="~{fragments/produto :: preco(${pedido.total})}"></span></td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <p><a th:href="@{/admin/pedidos}">&larr; Voltar aos pedidos</a></p>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

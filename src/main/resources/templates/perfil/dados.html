@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dados pessoais - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-medio" aria-labelledby="titulo">
+    <h1 id="titulo">Minha conta</h1>
+    <nav th:replace="~{fragments/layout :: menuConta('dados')}"></nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h2>Dados pessoais</h2>
+
+    <form th:action="@{/perfil}" th:object="${perfil}" method="post" class="formulario" novalidate>
+
+        <div class="campo">
+            <span class="rotulo">E-mail</span>
+            <p class="valor-fixo" th:text="${email}">email@exemplo.com</p>
+            <small>O e-mail não pode ser alterado.</small>
+        </div>
+
+        <div class="campo">
+            <label for="nome">Nome completo</label>
+            <input type="text" id="nome" th:field="*{nome}" autocomplete="name" required
+                   th:attr="aria-invalid=${#fields.hasErrors('nome')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="telefone">Telefone (opcional)</label>
+            <input type="tel" id="telefone" th:field="*{telefone}" autocomplete="tel"
+                   th:attr="aria-invalid=${#fields.hasErrors('telefone')}">
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></p>
+        </div>
+
+        <div class="campo">
+            <label for="cpf">CPF</label>
+            <input type="text" id="cpf" th:field="*{cpf}" inputmode="numeric" placeholder="000.000.000-00"
+                   aria-describedby="dica-cpf" th:attr="aria-invalid=${#fields.hasErrors('cpf')}">
+            <small id="dica-cpf">Necessário para pagar pedidos.</small>
+            <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('cpf')}" th:errors="*{cpf}"></p>
+        </div>
+
+        <button type="submit" class="botao botao-destaque">Salvar alterações</button>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

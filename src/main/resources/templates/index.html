@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${termo != null} ? 'Busca - Loja Vendas' : 'Início - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+
+    <h1 id="titulo" th:if="${termo == null}">Catálogo de produtos</h1>
+    <h1 id="titulo" th:if="${termo != null}" th:text="|Resultados para “${termo}”|">Resultados</h1>
+
+    <div class="catalogo">
+
+        <!-- Filtros -->
+        <aside class="filtros" aria-labelledby="titulo-filtros">
+            <h2 id="titulo-filtros">Filtros</h2>
+
+            <form th:action="@{/busca}" method="get">
+                <input type="hidden" name="termo" th:value="${termo}">
+
+                <div class="campo">
+                    <label for="categoria">Categoria</label>
+                    <select id="categoria" name="categoria">
+                        <option value="">Todas</option>
+                        <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}"
+                                th:selected="${c.id == categoriaId}">Categoria</option>
+                    </select>
+                </div>
+
+                <fieldset class="campo faixa-preco">
+                    <legend>Faixa de preço (R$)</legend>
+                    <div class="faixa-linha">
+                        <div>
+                            <label for="min">Mínimo</label>
+                            <input type="number" id="min" name="min" min="0" step="0.01"
+                                   inputmode="decimal" th:value="${min}">
+                        </div>
+                        <div>
+                            <label for="max">Máximo</label>
+                            <input type="number" id="max" name="max" min="0" step="0.01"
+                                   inputmode="decimal" th:value="${max}">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="campo">
+                    <label for="ordem">Ordenar por</label>
+                    <select id="ordem" name="ordem">
+                        <option value="nome" th:selected="${ordem == 'nome'}">Nome (A-Z)</option>
+                        <option value="menor-preco" th:selected="${ordem == 'menor-preco'}">Menor preço</option>
+                        <option value="maior-preco" th:selected="${ordem == 'maior-preco'}">Maior preço</option>
+                        <option value="recentes" th:selected="${ordem == 'recentes'}">Mais recentes</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="botao botao-destaque">Aplicar filtros</button>
+                <a class="link-limpar" th:if="${filtrosAtivos}" th:href="@{/}">Limpar filtros</a>
+            </form>
+        </aside>
+
+        <!-- Resultados -->
+        <section class="resultados" aria-label="Lista de produtos">
+
+            <div class="alerta alerta-aviso" role="status" th:if="${aviso != null}">
+                <p th:text="${aviso}">Aviso</p>
+            </div>
+
+            <p class="contagem" role="status" aria-live="polite"
+               th:text="${resultado.totalElements == 1} ? '1 produto encontrado' : |${resultado.totalElements} produtos encontrados|">
+                0 produtos encontrados
+            </p>
+
+            <div class="vazio" th:if="${resultado.empty}">
+                <p>Nenhum produto encontrado com esses critérios.</p>
+                <p><a th:href="@{/}">Ver todos os produtos</a></p>
+            </div>
+
+            <ul class="grade-produtos" th:unless="${resultado.empty}">
+                <li th:each="produto : ${produtos}">
+                    <th:block th:replace="~{fragments/produto :: card(${produto})}"></th:block>
+                </li>
+            </ul>
+
+            <nav class="paginacao" aria-label="Paginação" th:if="${resultado.totalPages > 1}">
+                <a class="botao" th:if="${urlAnterior != null}" th:href="@{${urlAnterior}}" rel="prev">Anterior</a>
+
+                <a class="botao pagina" th:each="link : ${links}" th:href="@{${link.url}}"
+                   th:text="${link.numero}"
+                   th:classappend="${link.atual} ? 'pagina-atual'"
+                   th:attr="aria-current=${link.atual ? 'page' : null},aria-label=|Página ${link.numero}|">1</a>
+
+                <a class="botao" th:if="${urlProxima != null}" th:href="@{${urlProxima}}" rel="next">Próxima</a>
+            </nav>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

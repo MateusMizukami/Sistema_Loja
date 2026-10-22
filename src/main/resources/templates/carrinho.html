@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Meu carrinho - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+    <h1 id="titulo">Meu carrinho</h1>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <div class="vazio" th:if="${carrinho == null or carrinho.itens.empty}">
+        <p>Seu carrinho está vazio.</p>
+        <p><a class="botao botao-destaque" th:href="@{/}">Ver produtos</a></p>
+    </div>
+
+    <th:block th:unless="${carrinho == null or carrinho.itens.empty}">
+        <div class="tabela-rolavel">
+            <table class="tabela">
+                <caption class="sr-only">Itens do carrinho</caption>
+                <thead>
+                <tr>
+                    <th scope="col">Produto</th>
+                    <th scope="col">Preço</th>
+                    <th scope="col">Quantidade</th>
+                    <th scope="col">Subtotal</th>
+                    <th scope="col"><span class="sr-only">Ações</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${carrinho.itens}">
+                    <th scope="row">
+                        <a th:href="@{/produtos/{id}(id=${item.produto.id})}" th:text="${item.produto.nome}">Produto</a>
+                        <p class="item-aviso" th:if="${!item.produto.ativo}">
+                            Produto indisponível. Remova-o para continuar.
+                        </p>
+                        <p class="item-aviso" th:if="${item.produto.ativo and item.quantidade gt item.produto.estoque}"
+                           th:text="|Estoque disponível: ${item.produto.estoque}. Reduza a quantidade.|">Estoque</p>
+                    </th>
+                    <td><span th:replace="~{fragments/produto :: preco(${item.precoUnitario})}"></span></td>
+                    <td>
+                        <form th:action="@{/carrinho/itens/{id}/quantidade(id=${item.id})}" method="post" class="form-quantidade">
+                            <label class="sr-only" th:for="${'qtd-' + item.id}"
+                                   th:text="|Quantidade de ${item.produto.nome}|">Quantidade</label>
+                            <input type="number" th:id="${'qtd-' + item.id}" name="quantidade"
+                                   min="1" max="99" th:value="${item.quantidade}" required>
+                            <button type="submit" class="botao">Atualizar</button>
+                        </form>
+                    </td>
+                    <td><span th:replace="~{fragments/produto :: preco(${item.subtotal})}"></span></td>
+                    <td>
+                        <form th:action="@{/carrinho/itens/{id}/remover(id=${item.id})}" method="post">
+                            <button type="submit" class="botao botao-perigo"
+                                    th:attr="aria-label=|Remover ${item.produto.nome} do carrinho|">Remover</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <th scope="row" colspan="3">Total</th>
+                    <td colspan="2"><span th:replace="~{fragments/produto :: preco(${carrinho.total})}"></span></td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="acoes-carrinho">
+            <a class="botao" th:href="@{/}">Continuar comprando</a>
+            <form th:action="@{/carrinho/esvaziar}" method="post" class="form-inline">
+                <button type="submit" class="botao botao-perigo">Esvaziar carrinho</button>
+            </form>
+            <a class="botao botao-destaque" th:href="@{/checkout}">Finalizar compra</a>
+        </div>
+    </th:block>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Meus pedidos - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+    <h1 id="titulo">Minha conta</h1>
+    <nav th:replace="~{fragments/layout :: menuConta('pedidos')}"></nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h2>Meus pedidos</h2>
+
+    <div class="vazio" th:if="${pedidos.empty}">
+        <p>Você ainda não fez nenhum pedido.</p>
+        <p><a class="botao botao-destaque" th:href="@{/}">Ver produtos</a></p>
+    </div>
+
+    <div class="tabela-rolavel" th:unless="${pedidos.empty}">
+        <table class="tabela">
+            <caption class="sr-only">Histórico de pedidos</caption>
+            <thead>
+            <tr>
+                <th scope="col">Pedido</th>
+                <th scope="col">Data</th>
+                <th scope="col">Status</th>
+                <th scope="col">Total</th>
+                <th scope="col"><span class="sr-only">Detalhes</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${pedidos}">
+                <th scope="row" th:text="|#${p.id}|">#1</th>
+                <td th:text="${#temporals.format(p.dataCriacao, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                <td><span class="status" th:classappend="${'status-' + #strings.toLowerCase(p.status.name())}"
+                          th:text="${p.status.descricao}">Status</span></td>
+                <td><span th:replace="~{fragments/produto :: preco(${p.total})}"></span></td>
+                <td><a th:href="@{/pedidos/{id}(id=${p.id})}"
+                       th:attr="aria-label=|Ver detalhes do pedido ${p.id}|">Ver detalhes</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

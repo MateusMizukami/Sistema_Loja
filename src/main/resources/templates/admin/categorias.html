@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Categorias - Painel do gerente')}"></head>
+<body class="area-admin">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container container-medio" aria-labelledby="titulo">
+    <h1 id="titulo">Painel do gerente</h1>
+    <nav th:replace="~{fragments/layout :: menuAdmin('categorias')}"></nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <div class="barra-filtro">
+        <h2>Categorias</h2>
+        <a class="botao botao-destaque" th:href="@{/admin/categorias/nova}">Nova categoria</a>
+    </div>
+
+    <div class="vazio" th:if="${categorias.empty}"><p>Nenhuma categoria cadastrada.</p></div>
+
+    <div class="tabela-rolavel" th:unless="${categorias.empty}">
+        <table class="tabela">
+            <caption class="sr-only">Lista de categorias</caption>
+            <thead>
+            <tr>
+                <th scope="col">Categoria</th>
+                <th scope="col">Produtos</th>
+                <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${categorias}">
+                <th scope="row" th:text="${c.nome}">Categoria</th>
+                <td th:text="${contagens[c.id]}">0</td>
+                <td class="acoes-celula">
+                    <a class="botao" th:href="@{/admin/categorias/{id}/editar(id=${c.id})}"
+                       th:attr="aria-label=|Editar categoria ${c.nome}|">Editar</a>
+                    <form th:action="@{/admin/categorias/{id}/excluir(id=${c.id})}" method="post" class="form-inline"
+                          onsubmit="return confirm('Excluir esta categoria?');">
+                        <button type="submit" class="botao botao-perigo"
+                                th:attr="aria-label=|Excluir categoria ${c.nome}|">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

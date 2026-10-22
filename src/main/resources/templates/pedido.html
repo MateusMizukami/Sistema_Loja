@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pedido - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+
+    <nav class="migalhas" aria-label="Você está em">
+        <ol>
+            <li><a th:href="@{/pedidos}">Meus pedidos</a></li>
+            <li aria-current="page" th:text="|Pedido #${pedido.id}|">Pedido</li>
+        </ol>
+    </nav>
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h1 id="titulo" th:text="|Pedido #${pedido.id}|">Pedido</h1>
+
+    <dl class="dados-pedido">
+        <dt>Data</dt>
+        <dd th:text="${#temporals.format(pedido.dataCriacao, 'dd/MM/yyyy HH:mm')}">01/01/2026</dd>
+        <dt>Status</dt>
+        <dd><span class="status" th:classappend="${'status-' + #strings.toLowerCase(pedido.status.name())}"
+                  th:text="${pedido.status.descricao}">Status</span></dd>
+        <dt>Endereço de entrega</dt>
+        <dd th:text="${pedido.enderecoEntrega}">Endereço</dd>
+    </dl>
+
+    <section class="bloco" aria-labelledby="titulo-pagamento"
+             th:if="${pagamento != null or pedido.status.name() == 'AGUARDANDO_PAGAMENTO'}">
+        <h2 id="titulo-pagamento">Pagamento</h2>
+
+        <p th:if="${pagamento != null}">
+            Forma: <strong th:text="${pagamento.forma.descricao}">PIX</strong>.
+            Situação: <strong th:text="${pagamento.status.descricao}">Aguardando pagamento</strong>.
+        </p>
+
+        <th:block th:if="${pedido.status.name() == 'AGUARDANDO_PAGAMENTO'}">
+            <p class="dica"
+               th:text="|Você tem ${expiracaoMinutos} minutos, a partir do pedido, para pagar. Depois disso o pedido é cancelado e o estoque é liberado.|">
+                Prazo para pagar.</p>
+
+            <p th:if="${pagamento != null and pagamento.status.name() == 'PENDENTE'}">
+                <a class="botao botao-destaque" th:href="@{/pedidos/{id}/pagamento(id=${pedido.id})}">Ver pagamento</a>
+            </p>
+
+            <form th:unless="${pagamento != null and pagamento.status.name() == 'PENDENTE'}"
+                  th:action="@{/pedidos/{id}/pagar(id=${pedido.id})}" method="post">
+                <div th:replace="~{fragments/pagamento :: formas}"></div>
+                <button type="submit" class="botao botao-destaque">Pagar agora</button>
+            </form>
+        </th:block>
+    </section>
+
+    <section class="bloco" aria-labelledby="titulo-nota" th:if="${nota != null}">
+        <h2 id="titulo-nota">Nota fiscal</h2>
+        <p>Nota nº <strong th:text="${nota.numero}">1</strong>
+            &mdash; <span th:text="${nota.status.descricao}">Autorizada</span>.</p>
+        <p><a class="botao" th:href="@{/pedidos/{id}/nota-fiscal(id=${pedido.id})}">Ver nota fiscal</a></p>
+    </section>
+
+    <h2>Itens</h2>
+    <div class="tabela-rolavel">
+        <table class="tabela">
+            <caption class="sr-only">Itens do pedido</caption>
+            <thead>
+            <tr>
+                <th scope="col">Produto</th>
+                <th scope="col">Qtd.</th>
+                <th scope="col">Preço</th>
+                <th scope="col">Subtotal</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${pedido.itens}">
+                <th scope="row" th:text="${item.produto.nome}">Produto</th>
+                <td th:text="${item.quantidade}">1</td>
+                <td><span th:replace="~{fragments/produto :: preco(${item.precoUnitario})}"></span></td>
+                <td><span th:replace="~{fragments/produto :: preco(${item.subtotal})}"></span></td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <th scope="row" colspan="3">Total</th>
+                <td><span th:replace="~{fragments/produto :: preco(${pedido.total})}"></span></td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <p><a th:href="@{/pedidos}">&larr; Voltar aos meus pedidos</a></p>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

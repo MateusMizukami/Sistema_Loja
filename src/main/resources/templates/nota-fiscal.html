@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(|Nota fiscal nº ${nota.numero} - Loja Vendas|)}"></head>
+<body th:classappend="${#strings.startsWith(voltar, '/admin')} ? 'area-admin'">
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container" aria-labelledby="titulo">
+
+    <p class="nao-imprimir acoes-nota">
+        <a th:href="@{${voltar}}">&larr; Voltar ao pedido</a>
+        <button type="button" class="botao" onclick="window.print()">Imprimir / salvar como PDF</button>
+    </p>
+
+    <article class="danfe">
+
+        <p class="danfe-cancelada" role="alert" th:if="${nota.status.name() == 'CANCELADA'}">
+            NOTA CANCELADA em <span th:text="${#temporals.format(nota.canceladaEm, 'dd/MM/yyyy HH:mm')}">data</span>.
+            Motivo: <span th:text="${nota.motivoCancelamento}">motivo</span>
+        </p>
+
+        <header class="danfe-topo">
+            <div>
+                <h1 id="titulo">Nota fiscal de venda</h1>
+                <p class="danfe-emitente">
+                    <strong th:text="${nota.emitenteNome}">Emitente</strong><br>
+                    CNPJ: <span th:text="${nota.emitenteCnpj}">00.000.000/0001-00</span>
+                </p>
+            </div>
+            <dl class="danfe-numero">
+                <dt>Nº</dt>
+                <dd th:text="${#numbers.formatInteger(nota.numero, 9, 'NONE')}">000000001</dd>
+                <dt>Série</dt>
+                <dd th:text="${nota.serie}">1</dd>
+                <dt>Emissão</dt>
+                <dd th:text="${#temporals.format(nota.emitidaEm, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026</dd>
+                <dt>Situação</dt>
+                <dd th:text="${nota.status.descricao}">Autorizada</dd>
+            </dl>
+        </header>
+
+        <section aria-labelledby="titulo-operacao" class="danfe-bloco">
+            <h2 id="titulo-operacao">Operação</h2>
+            <p>Natureza da operação: <strong th:text="${nota.naturezaOperacao}">Venda de mercadoria</strong></p>
+            <p>Pedido: <strong th:text="|#${nota.pedido.id}|">#1</strong></p>
+            <p>Código de verificação: <span class="mono" th:text="${nota.codigoVerificacao}">uuid</span></p>
+        </section>
+
+        <section aria-labelledby="titulo-destinatario" class="danfe-bloco">
+            <h2 id="titulo-destinatario">Destinatário</h2>
+            <p><strong th:text="${nota.destinatarioNome}">Nome</strong></p>
+            <p>CPF: <span th:text="${nota.destinatarioCpf}">000.000.000-00</span></p>
+            <p>E-mail: <span th:text="${nota.destinatarioEmail}">email</span></p>
+            <p>Endereço de entrega: <span th:text="${nota.enderecoEntrega}">endereço</span></p>
+        </section>
+
+        <section aria-labelledby="titulo-itens" class="danfe-bloco">
+            <h2 id="titulo-itens">Itens</h2>
+            <div class="tabela-rolavel">
+                <table class="tabela">
+                    <caption class="sr-only">Itens da nota fiscal</caption>
+                    <thead>
+                    <tr>
+                        <th scope="col">Item</th>
+                        <th scope="col">Descrição</th>
+                        <th scope="col">Qtd.</th>
+                        <th scope="col">Valor unitário</th>
+                        <th scope="col">Valor total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${nota.itens}">
+                        <td th:text="${item.numeroItem}">1</td>
+                        <th scope="row" th:text="${item.descricao}">Produto</th>
+                        <td th:text="${item.quantidade}">1</td>
+                        <td><span th:replace="~{fragments/produto :: preco(${item.valorUnitario})}"></span></td>
+                        <td><span th:replace="~{fragments/produto :: preco(${item.valorTotal})}"></span></td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <th scope="row" colspan="4">Valor total da nota</th>
+                        <td><span th:replace="~{fragments/produto :: preco(${nota.valorTotal})}"></span></td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <footer class="danfe-rodape">
+            <p class="danfe-nota-rodape" th:if="${nota.simulada}">
+                Documento de demonstração gerado em projeto acadêmico. Sem valor fiscal.
+            </p>
+        </footer>
+    </article>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

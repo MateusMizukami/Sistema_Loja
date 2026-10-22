@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${produto.nome} + ' - Loja Vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main id="conteudo" class="container">
+
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <nav class="migalhas" aria-label="Você está em">
+        <ol>
+            <li><a th:href="@{/}">Início</a></li>
+            <li th:if="${produto.categoria != null}">
+                <a th:href="@{/busca(categoria=${produto.categoria.id})}" th:text="${produto.categoria.nome}">Categoria</a>
+            </li>
+            <li aria-current="page" th:text="${produto.nome}">Produto</li>
+        </ol>
+    </nav>
+
+    <article class="detalhe" aria-labelledby="titulo">
+        <div class="detalhe-imagem">
+            <img th:src="${#strings.isEmpty(produto.urlImagem)} ? @{/img/placeholder.svg} : ${produto.urlImagem}"
+                 th:alt="${#strings.isEmpty(produto.urlImagem)} ? 'Produto sem imagem' : |Imagem do produto ${produto.nome}|">
+        </div>
+
+        <div class="detalhe-info">
+            <h1 id="titulo" th:text="${produto.nome}">Nome do produto</h1>
+
+            <p class="detalhe-preco"><span th:replace="~{fragments/produto :: preco(${produto.preco})}"></span></p>
+
+            <p class="estoque estoque-ok" th:if="${produto.estoque > 5}">Em estoque</p>
+            <p class="estoque estoque-baixo" th:if="${produto.estoque > 0 and produto.estoque <= 5}"
+               th:text="|Restam apenas ${produto.estoque} unidades|">Restam poucas unidades</p>
+            <p class="estoque estoque-esgotado" th:if="${produto.estoque == 0}">Produto esgotado</p>
+
+            <section class="detalhe-descricao" th:if="${!#strings.isEmpty(produto.descricao)}" aria-labelledby="titulo-descricao">
+                <h2 id="titulo-descricao">Descrição</h2>
+                <p th:text="${produto.descricao}">Descrição do produto.</p>
+            </section>
+
+            <!-- Compra: visitante precisa entrar; só o cliente (ROLE_USER) adiciona ao carrinho -->
+            <div class="detalhe-acao" th:if="${produto.estoque > 0}">
+                <p sec:authorize="!isAuthenticated()">
+                    <a class="botao botao-destaque" th:href="@{/login}">Entre para comprar</a>
+                    <span class="dica">ou <a th:href="@{/cadastro}">crie sua conta</a>.</span>
+                </p>
+                <form sec:authorize="hasRole('USER')" th:action="@{/carrinho/adicionar}" method="post" class="form-compra">
+                    <input type="hidden" name="produtoId" th:value="${produto.id}">
+                    <label for="quantidade">Quantidade</label>
+                    <input type="number" id="quantidade" name="quantidade" value="1" min="1"
+                           th:max="${produto.estoque lt 99 ? produto.estoque : 99}" required>
+                    <button type="submit" class="botao botao-destaque">Adicionar ao carrinho</button>
+                </form>
+            </div>
+
+            <p><a th:href="@{/}">&larr; Voltar ao catálogo</a></p>
+        </div>
+    </article>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
