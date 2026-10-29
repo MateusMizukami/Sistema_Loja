@@ -18,7 +18,7 @@
         </div>
 
         <div class="campo">
-            <label for="logradouro">Logradouro</label>
+            <label for="logradouro">Rua</label>
             <input type="text" id="logradouro" th:field="*{logradouro}" autocomplete="address-line1" required
                    th:attr="aria-invalid=${#fields.hasErrors('logradouro')}">
             <p class="erro-campo" role="alert" th:if="${#fields.hasErrors('logradouro')}" th:errors="*{logradouro}"></p>
